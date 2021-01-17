@@ -10,6 +10,11 @@ public class WechatWorkProviderConfig extends OAuth2IdentityProviderConfig {
         super(model);
     }
 
+    public WechatWorkProviderConfig ()
+    {
+    }
+
+
     public String getAgentId() {
         return getConfig().get("agentId");
     }

@@ -129,8 +129,8 @@ public class WechatWorkIdentityProvider extends AbstractOAuth2IdentityProvider<W
     private JsonNode _renew_access_token() {
         try {
             JsonNode j = SimpleHttp.doGet(TOKEN_URL, session)
-                                   .param(WEIXIN_CORP_ID, getConfig().getClientId())
-                                   .param(WEIXIN_CORP_SECRET, getConfig().getClientSecret()).asJson();
+                    .param(WEIXIN_CORP_ID, getConfig().getClientId())
+                    .param(WEIXIN_CORP_SECRET, getConfig().getClientSecret()).asJson();
 //            logger.info("request wechat work access token " + j.toString());
             return j;
         } catch (Exception e) {
@@ -201,9 +201,9 @@ public class WechatWorkIdentityProvider extends AbstractOAuth2IdentityProvider<W
         try {
             JsonNode profile;
             profile = SimpleHttp.doGet(PROFILE_URL, session)
-                            .param(ACCESS_TOKEN_KEY, accessToken)
-                            .param("code", authorizationCode)
-                            .asJson();
+                    .param(ACCESS_TOKEN_KEY, accessToken)
+                    .param("code", authorizationCode)
+                    .asJson();
             // {"UserId":"ZhongXun","DeviceId":"10000556333395ZN","errcode":0,"errmsg":"ok"}
             logger.info("profile first " + profile.toString());
             long errcode = profile.get("errcode").asInt();
@@ -265,8 +265,7 @@ public class WechatWorkIdentityProvider extends AbstractOAuth2IdentityProvider<W
                     .queryParam(OAUTH2_PARAMETER_STATE, request.getState().getEncoded())
             ;
             uriBuilder.fragment(WEIXIN_REDIRECT_FRAGMENT);
-        }
-        else {
+        } else {
             uriBuilder = UriBuilder.fromUri(getConfig().getQrcodeAuthorizationUrl());
             uriBuilder
                     .queryParam(OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId())
@@ -302,9 +301,9 @@ public class WechatWorkIdentityProvider extends AbstractOAuth2IdentityProvider<W
 
         @GET
         public Response authResponse(@QueryParam(AbstractOAuth2IdentityProvider.OAUTH2_PARAMETER_STATE) String state,
-                @QueryParam(AbstractOAuth2IdentityProvider.OAUTH2_PARAMETER_CODE) String authorizationCode,
-                @QueryParam(OAuth2Constants.ERROR) String error,
-                @QueryParam("appid") String client_id) {
+                                     @QueryParam(AbstractOAuth2IdentityProvider.OAUTH2_PARAMETER_CODE) String authorizationCode,
+                                     @QueryParam(OAuth2Constants.ERROR) String error,
+                                     @QueryParam("appid") String client_id) {
             logger.info("OAUTH2_PARAMETER_CODE=" + authorizationCode);
 
             if (error != null) {
