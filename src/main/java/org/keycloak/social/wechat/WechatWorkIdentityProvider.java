@@ -52,7 +52,7 @@ public class WechatWorkIdentityProvider extends AbstractOAuth2IdentityProvider<W
         implements SocialIdentityProvider<WechatWorkProviderConfig> {
 
     public static final String AUTH_URL = "https://open.weixin.qq.com/connect/oauth2/authorize";
-    public static final String QRCODE_AUTH_URL = "https://open.work.weixin.qq.com/wwopen/sso/qrConnect";  // 企业微信外使用
+    public static final String QRCODE_AUTH_URL = "https://open.work.weixin.qq.com/wwopen/sso/qrConnect";
     public static final String TOKEN_URL = "https://qyapi.weixin.qq.com/cgi-bin/gettoken";
 
     public static final String DEFAULT_SCOPE = "snsapi_base";
@@ -172,7 +172,10 @@ public class WechatWorkIdentityProvider extends AbstractOAuth2IdentityProvider<W
         identity.setUsername(getJsonProperty(profile, "userid").toLowerCase());
         identity.setBrokerUserId(getJsonProperty(profile, "userid").toLowerCase());
         identity.setModelUsername(getJsonProperty(profile, "userid").toLowerCase());
+
+        // 邮箱为空
         identity.setFirstName(getJsonProperty(profile, "email").split("@")[0].toLowerCase());
+        //identity.setFirstName(getJsonProperty(profile, "name"));
         identity.setLastName(getJsonProperty(profile, "name"));
         identity.setEmail(getJsonProperty(profile, "email").toLowerCase());
         // 手机号码，第三方仅通讯录应用可获取
@@ -188,6 +191,7 @@ public class WechatWorkIdentityProvider extends AbstractOAuth2IdentityProvider<W
 
         identity.setIdpConfig(getConfig());
         identity.setIdp(this);
+        logger.info(identity.toString());
         AbstractJsonUserAttributeMapper.storeUserProfileForMapper(identity, profile, getConfig().getAlias());
         return identity;
     }
@@ -222,7 +226,7 @@ public class WechatWorkIdentityProvider extends AbstractOAuth2IdentityProvider<W
                     .param(ACCESS_TOKEN_KEY, accessToken)
                     .param("userid", getJsonProperty(profile, "UserId"))
                     .asJson();
-//            logger.info("get userInfo =" + profile.toString());
+            logger.info("get userInfo =" + profile.toString());
             context = extractIdentityFromProfile(null, profile);
         } catch (Exception e) {
             logger.error(e);
@@ -255,7 +259,7 @@ public class WechatWorkIdentityProvider extends AbstractOAuth2IdentityProvider<W
         final UriBuilder uriBuilder;
 
         String ua = request.getHttpRequest().getHttpHeaders().getHeaderString("user-agent").toLowerCase();
-        if (ua.contains("wxwork")) {
+        if (ua.contains("wxwork") || ua.contains("micromessenger")) {
             uriBuilder = UriBuilder.fromUri(getConfig().getAuthorizationUrl());
             uriBuilder
                     .queryParam(OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId())
@@ -352,5 +356,18 @@ public class WechatWorkIdentityProvider extends AbstractOAuth2IdentityProvider<W
         user.setFirstName(context.getFirstName());
         user.setLastName(context.getLastName());
         user.setEmail(context.getEmail());
+    }
+
+    @Override
+    public String getJsonProperty(JsonNode jsonNode, String name) {
+        if (jsonNode.has(name) && !jsonNode.get(name).isNull()) {
+            String s = jsonNode.get(name).asText();
+            if (s != null && !s.isEmpty())
+                return s;
+            else
+                return "";
+        }
+
+        return "";
     }
 }
